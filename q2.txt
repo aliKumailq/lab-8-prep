@@ -15,6 +15,7 @@ For the naive way (i.e. storing all 6 points in the vertex array):
 - Total memory usage with doubles: 6 * 4 + 12 * 8 = 120 bytes
 
 When either approach wins:
+If we need to assign attributes/characteristics to each vertex for each triangle, then we need to store all 6 verticies. In case the two triangles share a vertex with the same position but different attributes. Otherwise, theres no reason not to use the 4 vertex method.
 
 2.3)
 UV_x = (500 - 200) / (600 - 200) = 0.75

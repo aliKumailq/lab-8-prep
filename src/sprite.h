@@ -4,21 +4,33 @@
 #include "basic_transform.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+#include "vector_util.h"
 
 class Sprite {  // could derive from sf::Drawable if you're willing to pay for a vptr, but not
                 // necessary.
 public:
-    Sprite(const sf::Texture& texture) {
-        // TODO
-    }
+    Sprite(const sf::Texture& texture) : Sprite(texture, sf::Vector2f(0.0f, 0.0f), sf::Vector2f(texture.getSize())) {}
 
     Sprite(const sf::Texture& texture, const sf::Vector2f& texMinPoint,
-           const sf::Vector2f& texMaxPoint) {
-        // TODO
+           const sf::Vector2f& texMaxPoint) : 
+    mTexture(&texture), 
+    mVertexArray(sf::PrimitiveType::Triangles, 6),
+    mMinPointTex(texMinPoint), 
+    mMaxPointTex(texMaxPoint ), 
+    mTransform()
+
+  {
+
+      for (size_t i = 0; i < 6; ++i) {
+        mVertexArray[i] = sf::Vertex{{0.0f, 0.0f}, sf::Color::White , DEFAULT_VERTICES[i] * sf::Vector2f(mTexture->getSize())};
+      }
+
     }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const {
-        // TODO
+        recomputeVertexArray();
+        states.texture = mTexture;
+        target.draw(mVertexArray, states);
     }
 
     sf::Vector2f& position() { return mTransform.translation; }
@@ -34,11 +46,37 @@ private:
     //     ranging from [0, 1] in both dimensions.
     //   - the next 3 correspond to the vertices of the bottom-right triangle. of the default
     //     rectangle.
-    static constexpr std::array<sf::Vector2f, 6> DEFAULT_VERTICES = {};  // TODO
+    static constexpr std::array<sf::Vector2f, 6> DEFAULT_VERTICES = {sf::Vector2f(1.0f, 0.0f),sf::Vector2f(0.0f, 0.0f),sf::Vector2f(0.0f, 1.0f), 
+      sf::Vector2f(0.0f, 1.0f), sf::Vector2f(1.0f, 1.0f), sf::Vector2f(1.0f, 0.0f) };  // TODO
 
     // if mTexture is valid, recomputes the positions and coords of sf::Vertex for each
     // of 6 possible entries in mVertexArray.
     void recomputeVertexArray() const {
+
+      auto origin = mOrigin;
+      auto topLeft = - origin; // location of each vertex relative to origin.
+      auto bottomRight = mMaxPointTex - origin;
+      auto topRight = sf::Vector2f(bottomRight.x, topLeft.y);
+      auto bottomLeft = sf::Vector2f(topLeft.x, bottomRight.y);
+
+      topLeft = mTransform.applyPoint(topLeft);
+      bottomRight = mTransform.applyPoint(bottomRight);
+
+      topRight = mTransform.applyPoint(topRight);
+      bottomLeft  = mTransform.applyPoint(bottomLeft); // apply transformations to each point relative to the origin 
+                                                       // must treat them as points to also capture the scaling in the trasnformation 
+
+      mVertexArray[0].position = topRight;
+      mVertexArray[1].position = topLeft;
+      mVertexArray[2].position = bottomLeft;
+      mVertexArray[3].position = bottomLeft;
+      mVertexArray[4].position = bottomRight;
+      mVertexArray[5].position = topRight;
+
+
+
+
+
         // TODO
     }
 
