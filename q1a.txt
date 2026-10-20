@@ -1,0 +1,1 @@
+Increasing theta performs a clockwise rotation if the y axis is pointing down because the x axis is still pointing right. If the y axis points UP, then its just a conventional counter-clockwise rotation.
